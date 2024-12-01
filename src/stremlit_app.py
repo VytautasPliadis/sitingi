@@ -59,7 +59,7 @@ def load_queries_from_folder(folder_path):
 queries = load_queries_from_folder("src/sql")
 
 # Streamlit programos išdėstymas
-st.title("SQLite duomenų bazės užklausų programa")
+st.title("Techninės užduoties sprendiniai")
 
 # Šoninė juosta su užklausų mygtukais
 st.sidebar.title("Pasirinkite užklausą")

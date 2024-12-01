@@ -1,5 +1,6 @@
 # Techninės užduoties sprendiniai
-
+[Streamlit aplikacija su sprendimais
+](https://vytautaspliadis-sitingi-srcstremlit-app-fr6zhh.streamlit.app/)
 ## 1. Neaktyvūs objektai
 Visų **šiuo metu** neaktyvių objektų sąrąšas (objekto nueris, neaktyvus nuo, nekatyvus iki)
 
