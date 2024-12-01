@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "sitingi"
+version = "0.1.0"
+description = ""
+authors = ["vytautaspl <vytautaspl@wix.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pydantic = "^2.10.2"
+datetime = "^5.5"
+streamlit = "^1.40.2"
+sqlmodel = "^0.0.22"
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

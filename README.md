@@ -1,4 +1,4 @@
-# Techninė užduotis
+# Techninės užduoties sprendiniai
 
 ## 1. Neaktyvūs objektai
 Visų **šiuo metu** neaktyvių objektų sąrąšas (objekto nueris, neaktyvus nuo, nekatyvus iki)
@@ -82,4 +82,19 @@ LEFT JOIN
     (SELECT * FROM buves_statuas WHERE rn = 1) bs ON o.obj_id = bs.obj_id
 LEFT JOIN
     (SELECT * FROM esamas_statusas WHERE rn = 1) es ON o.obj_id = es.obj_id;
+```
+
+## 4. Objektai be galiojančio plano
+```sql
+SELECT 
+    o.obj_numeris
+FROM 
+    objektai o
+LEFT JOIN 
+    planai p
+ON 
+    o.obj_id = p.obj_id 
+    AND (p.pln_galioja_iki IS NULL OR p.pln_galioja_iki >= CURRENT_DATE)
+WHERE 
+    p.pln_id IS NULL;
 ```
