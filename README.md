@@ -1,5 +1,6 @@
 # Techninės užduoties sprendiniai
-[Streamlit aplikacija su sprendimais
+
+[STREAMLIT APLIKACIJA SU SQL SPRENDINIAIS
 ](https://vytautaspliadis-sitingi-srcstremlit-app-fr6zhh.streamlit.app/)
 ## 1. Neaktyvūs objektai
 Visų **šiuo metu** neaktyvių objektų sąrąšas (objekto nueris, neaktyvus nuo, nekatyvus iki)
@@ -7,7 +8,7 @@ Visų **šiuo metu** neaktyvių objektų sąrąšas (objekto nueris, neaktyvus n
 ```sql
 SELECT 
     o.obj_numeris AS objekto_numeris
-    , b.busena_nuo AS busena_nuo
+    , b.busena_nuo AS busena_nuos
     , b.busena_iki AS busena_iki
 FROM 
     busenos b
@@ -99,3 +100,72 @@ ON
 WHERE 
     p.pln_id IS NULL;
 ```
+
+# Sistemos dizaino pasiūlymas
+## ETL procesas naudojant Airflow
+
+Naudojamas Airflow DAG'as, kuris periodiškai (kasdieniną) kviečia išorinį API ir įkelia gautus duomenis į duomenų bazę.
+Duomenys yra renkami už vakarykštį paros periodą, nes priklausomai nuo duomenų šaltinio gali būti, kad duomenys dar nėra pilnai atnaujinti.
+Galimybė „perkrauti“ tam tikrą dieną įgyvendinama perkraunant DAG'a rankiniu būdu, arba rankiniu būdu su parametrais, 
+nurodant specifinį dienų ruožą (trigger_dag with parameters/config).
+
+## Duomenų įkėlimas naudojant SQL
+
+Pagrindinėje lentelėje (target) laikomi visi istoriniai duomenys. 'Šaltinio' lentelėje (source) yra laikomi vakar dienos duomenys. 
+Naudojamas MERGE INTO SQL komanda, kuri leidžia atnaujinti arba įkelti naujus duomenis į duomenų bazę.
+Jei nėra vieno unikalaus rakto, galima naudoti kombinuotą unikalų raktą, kuris sudarytas iš kelių stulpelių.
+```sql
+MERGE INTO target_table AS target
+USING source_table AS source
+ON target.column1 = source.column1
+   AND target.column2 = source.column2
+WHEN MATCHED THEN
+    UPDATE SET 
+        target.column3 = source.column3,
+        target.column_n = source.column_n
+WHEN NOT MATCHED THEN
+    INSERT (column1, column2, column3, column_n)
+    VALUES (source.column1, source.column2, source.column3, source.column_n);
+```
+## Duomenų įkėlimas naudojant ORM
+
+Labiau 'pitokiškas' būdas - naudoti SQLModel biblioteką. Tai apima tiek Pydantic (validaciją), tiek SQLAlchemy (duomenų bazės sąveiką).
+Tokiu būdu galima aprašyti duomenų bazės lenteles kaip Python klases. 
+Štai pavyzdys ORM iš prieš tai buvusios užduoties, kuriame sukuriami ryšiai tarp objektų:
+```python
+class Objektai(SQLModel, table=True):
+    obj_id: int = Field(default=None, primary_key=True)
+    obj_numeris: int = Field(unique=True)
+    busenos: List["Busenos"] = Relationship(back_populates="objektas")
+    planai: List["Planai"] = Relationship(back_populates="objektas")
+
+class Busenos(SQLModel, table=True):
+    busena_id: int = Field(default=None, primary_key=True)
+    obj_id: int = Field(foreign_key="objektai.obj_id")
+    busena: int
+    busena_nuo: datetime
+    busena_iki: Optional[datetime] = Field(default=None, nullable=True)
+    objektas: "Objektai" = Relationship(back_populates="busenos")
+
+class Busena_kodai(SQLModel, table=True):
+    busena_kodas: int = Field(default=None, primary_key=True)
+    busena_tekstas: str
+
+class Planai(SQLModel, table=True):
+    pln_id: int = Field(default=None, primary_key=True)
+    obj_id: int = Field(foreign_key="objektai.obj_id")
+    pln_galioja_nuo: datetime
+    pln_galioja_iki: Optional[datetime] = Field(default=None, nullable=True)
+    objektas: "Objektai" = Relationship(back_populates="planai")
+```
+
+# Sistemos dizaino pasiūlymas meteo duomenims
+Norint užtikrinti, kad turėtume visų meteorologinių stočių duomenis, reikia sukurti sistemą, kuri:
+- naudotų API endpoint'ą, kuris grąžintų visų stočių ID sąrašą.
+- naudotų API užklausą vienu metu gauti visų stočių duomenis ir juos išsaugotų duomenų bazėje.
+- identifikuotų trūkstamas stotis palyginant gautus duomenis su žinomu stočių sąrašu.
+- sukurtų sąrašą su trūkstamais stočių ID
+- šis sąrašas būtų naudojamas dinamiškai sukurti naujas užklausas, kurių statusą galima butų stebeti Airflow UI aplinkoje.
+- naudotų lygiagretų užklausų vykdymą trūkstamų stočių duomenims gauti.
+
+Šiam pasiūlymui būtinas API endpoint'as su išvardintais funkcionalumais (visų stočių ID, vienos ir visų sotčio duomenų gavimas).
