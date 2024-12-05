@@ -158,8 +158,12 @@ class Planai(SQLModel, table=True):
     pln_galioja_iki: Optional[datetime] = Field(default=None, nullable=True)
     objektas: "Objektai" = Relationship(back_populates="planai")
 ```
-![](/home/vytas/PycharmProjects/sitingi/img/schema.png)
+
+
+
 # Sistemos dizaino pasiūlymas meteo duomenims
+<img src="/home/vytas/PycharmProjects/sitingi/img/schema.png" width="800"/>
+
 ## DAG Aprašymas
 
 `dags/meteo_data_pipline.py` skirtas automatiškai tvarkyti meteorologinių stočių duomenis. Jis veikia kas dieną ir atlieka šiuos veiksmus:
