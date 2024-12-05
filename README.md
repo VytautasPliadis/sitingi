@@ -162,7 +162,7 @@ class Planai(SQLModel, table=True):
 
 
 # Sistemos dizaino pasiūlymas meteo duomenims
-<img src="/home/vytas/PycharmProjects/sitingi/img/schema.png" width="800"/>
+<img src="img/schema.png" width="600"/>
 
 ## DAG Aprašymas
 
