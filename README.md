@@ -101,7 +101,7 @@ WHERE
     p.pln_id IS NULL;
 ```
 
-# Sistemos dizaino pasiūlymas
+# Sistemos dizaino pasiūlymas 
 ## ETL procesas naudojant Airflow
 
 Naudojamas Airflow DAG'as, kuris periodiškai (kasdieniną) kviečia išorinį API ir įkelia gautus duomenis į duomenų bazę.
@@ -109,7 +109,7 @@ Duomenys yra renkami už vakarykštį paros periodą, nes priklausomai nuo duome
 Galimybė „perkrauti“ tam tikrą dieną įgyvendinama perkraunant DAG'a rankiniu būdu, arba rankiniu būdu su parametrais, 
 nurodant specifinį dienų ruožą (trigger_dag with parameters/config).
 
-## Duomenų įkėlimas naudojant SQL
+## Variantas 1: Duomenų įkėlimas naudojant SQL
 
 Pagrindinėje lentelėje (target) laikomi visi istoriniai duomenys. 'Šaltinio' lentelėje (source) yra laikomi vakar dienos duomenys. 
 Naudojamas MERGE INTO SQL komanda, kuri leidžia atnaujinti arba įkelti naujus duomenis į duomenų bazę.
@@ -127,7 +127,7 @@ WHEN NOT MATCHED THEN
     INSERT (column1, column2, column3, column_n)
     VALUES (source.column1, source.column2, source.column3, source.column_n);
 ```
-## Duomenų įkėlimas naudojant ORM
+## Variantas 2: Duomenų įkėlimas naudojant ORM
 
 Labiau 'pitokiškas' būdas - naudoti SQLModel biblioteką. Tai apima tiek Pydantic (validaciją), tiek SQLAlchemy (duomenų bazės sąveiką).
 Tokiu būdu galima aprašyti duomenų bazės lenteles kaip Python klases. 
@@ -158,14 +158,20 @@ class Planai(SQLModel, table=True):
     pln_galioja_iki: Optional[datetime] = Field(default=None, nullable=True)
     objektas: "Objektai" = Relationship(back_populates="planai")
 ```
-
+![](/home/vytas/PycharmProjects/sitingi/img/schema.png)
 # Sistemos dizaino pasiūlymas meteo duomenims
-Norint užtikrinti, kad turėtume visų meteorologinių stočių duomenis, reikia sukurti sistemą, kuri:
-- naudotų API endpoint'ą, kuris grąžintų visų stočių ID sąrašą.
-- naudotų API užklausą vienu metu gauti visų stočių duomenis ir juos išsaugotų duomenų bazėje.
-- identifikuotų trūkstamas stotis palyginant gautus duomenis su žinomu stočių sąrašu.
-- sukurtų sąrašą su trūkstamais stočių ID
-- šis sąrašas būtų naudojamas dinamiškai sukurti naujas užklausas, kurių statusą galima butų stebeti Airflow UI aplinkoje.
-- naudotų lygiagretų užklausų vykdymą trūkstamų stočių duomenims gauti.
+## DAG Aprašymas
 
-Šiam pasiūlymui būtinas API endpoint'as su išvardintais funkcionalumais (visų stočių ID, vienos ir visų sotčio duomenų gavimas).
+`dags/meteo_data_pipline.py` skirtas automatiškai tvarkyti meteorologinių stočių duomenis. Jis veikia kas dieną ir atlieka šiuos veiksmus:
+
+- Parsisiunčia visų stočių ID iš API.
+- Parsisiunčia duomenis apie visas meteorologines stotis.
+- Įkelia duomenis į PostgreSQL duomenų bazę.
+- Nustato, kurių stotčių trūksta (remiantis ID sąrašu).
+- Dinamiškai suria atkiras užduotis trūkstamoms stotims
+- Paraleliškai parsisiunčia ir įkelia trūkstamų stočių duomenis į duomenų bazę.
+
+Konstantos:
+- ALL_STATIONS_IDS_ENDPOINT – API URL visų stočių ID gauti.
+- ALL_STATIONS_DATA_ENDPOINT – API URL visų stočių duomenims gauti.
+- SPECIFIC_STATION_DATA_ENDPOINT – API URL konkrečios stoties duomenims gauti.
