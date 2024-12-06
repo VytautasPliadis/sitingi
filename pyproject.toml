@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "sitingi"
 version = "0.1.0"
-description = ""
-authors = ["vytautaspl <vytautaspl@wix.com>"]
+description = "technine uzduotis"
+authors = ["vytautaspl <vytautas.pliadis@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
