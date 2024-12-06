@@ -166,7 +166,7 @@ class Planai(SQLModel, table=True):
 
 ## DAG Aprašymas
 
-`dags/meteo_data_pipline.py` skirtas automatiškai tvarkyti meteorologinių stočių duomenis. Jis veikia kas dieną ir atlieka šiuos veiksmus:
+`dags/meteo_data_pipline.py` skirtas automatiškai gauti meteorologinių stočių duomenis. DAG'as veikia kas dieną ir atlieka šiuos veiksmus:
 
 - Parsisiunčia visų stočių ID iš API.
 - Parsisiunčia duomenis apie visas meteorologines stotis.
