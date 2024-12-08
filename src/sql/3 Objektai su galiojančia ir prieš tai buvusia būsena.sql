@@ -25,8 +25,8 @@ esamas_statusas AS (
 )
 SELECT
     o.obj_numeris AS objekto_numeris
-    , es.esamas_statusas AS esamas_statusas
     , bs.buves_statusas AS buves_statusas
+    , es.esamas_statusas AS esamas_statusas
 FROM
     Objektai o
 LEFT JOIN
