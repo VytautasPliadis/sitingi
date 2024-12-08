@@ -1,5 +1,5 @@
 SELECT
-    o.obj_numeris
+    o.obj_numeris AS objekto_numeris
 FROM
     objektai o
 LEFT JOIN
