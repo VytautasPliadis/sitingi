@@ -1,4 +1,4 @@
-WITH paskutinis_statusas_cte AS (
+WITH paskutinis_statusas AS (
     SELECT
         obj_id
         , MAX(busena_nuo) AS max_busena_nuo
@@ -18,4 +18,4 @@ JOIN
 JOIN
     busena_kodai bk ON b.busena = bk.busena_kodas
 JOIN
-    paskutinis_statusas_cte ps ON b.obj_id = ps.obj_id AND b.busena_nuo = ps.max_busena_nuo;
+    paskutinis_statusas ps ON b.obj_id = ps.obj_id AND b.busena_nuo = ps.max_busena_nuo;
